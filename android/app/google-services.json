@@ -1,0 +1,122 @@
+{
+  "project_info": {
+    "project_number": "600023016657",
+    "firebase_url": "https://inventario-denzil-develop.firebaseio.com",
+    "project_id": "inventario-denzil-develop",
+    "storage_bucket": "inventario-denzil-develop.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600023016657:android:e74e189632f7a59f8d11f0",
+        "android_client_info": {
+          "package_name": "com.example.inventariosdenzil"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "600023016657-lfd38kvph4h2ij193dfl5r1r1dl2lfcv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.inventariosdenzil",
+            "certificate_hash": "b6a3ee2bb2b6a450f42e032c17efce848b3712fe"
+          }
+        },
+        {
+          "client_id": "600023016657-en10qjh25si4n362fdhgtl49s0ft8bjk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtvUyRHnxxKUy888XXQbxLaeHuIfkMjQM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "600023016657-en10qjh25si4n362fdhgtl49s0ft8bjk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600023016657:android:d659e5f1e9d6c3f08d11f0",
+        "android_client_info": {
+          "package_name": "com.example.inventariosdenzil2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "600023016657-9kga05ofkgv7cg9e8disjiln8grbqg2h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.inventariosdenzil2",
+            "certificate_hash": "b6a3ee2bb2b6a450f42e032c17efce848b3712fe"
+          }
+        },
+        {
+          "client_id": "600023016657-en10qjh25si4n362fdhgtl49s0ft8bjk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtvUyRHnxxKUy888XXQbxLaeHuIfkMjQM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "600023016657-en10qjh25si4n362fdhgtl49s0ft8bjk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600023016657:android:736a47f78e2734128d11f0",
+        "android_client_info": {
+          "package_name": "com.example.inventariosdenzil3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "600023016657-qlncc93pdoi8nmpe4nuch956459l0h7k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.inventariosdenzil3",
+            "certificate_hash": "b6a3ee2bb2b6a450f42e032c17efce848b3712fe"
+          }
+        },
+        {
+          "client_id": "600023016657-en10qjh25si4n362fdhgtl49s0ft8bjk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtvUyRHnxxKUy888XXQbxLaeHuIfkMjQM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "600023016657-en10qjh25si4n362fdhgtl49s0ft8bjk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
