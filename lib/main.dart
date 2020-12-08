@@ -15,7 +15,7 @@ void main() {
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference sedesCollection =
-    FirebaseFirestore.instance.collection('denzilescolar');
+    FirebaseFirestore.instance.collection('sedes');
 
 bool isDarkModeEnabled = false;
 

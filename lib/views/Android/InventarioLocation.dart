@@ -16,14 +16,14 @@ import 'package:inventariosdenzil/widgets/models.dart';
 // import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
+// import 'package:hive/hive.dart';
+// import 'package:path_provider/path_provider.dart';
 
 import '../../styles/extenciones.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference ubicacionsCollection =
-    FirebaseFirestore.instance.collection('denzilescolar');
+    FirebaseFirestore.instance.collection('sedes');
 
 bool isDarkModeEnabled = false;
 bool _sideMenuOpen = false;
@@ -65,9 +65,9 @@ class AndroidInventarioLocationPageState
       // await getData(widget.locationCollection,
       //     widget.location.subUbicacion.nombre, 'Web');
     } else if (Platform.isAndroid) {
-      final dir = await getApplicationDocumentsDirectory();
-      Hive.init(dir.path);
-      storage = await Hive.openBox('storage');
+      // final dir = await getApplicationDocumentsDirectory();
+      // Hive.init(dir.path);
+      // storage = await Hive.openBox('storage');
       await getInventario();
     }
   }
@@ -373,7 +373,7 @@ class AndroidInventarioLocationPageState
                   // print(['Articulo', locations[index].toJson()]);
                   CollectionReference locationCollection = FirebaseFirestore
                       .instance
-                      .collection('denzilescolar')
+                      .collection('sedes')
                       .doc(locations[index].sede.nombre)
                       .collection('ubicaciones')
                       .doc(locations[index].ubicacion.nombre)

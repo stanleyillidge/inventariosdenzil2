@@ -15,14 +15,14 @@ import 'package:waterfall_flow/waterfall_flow.dart';
 // import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
+// import 'package:hive/hive.dart';
+// import 'package:path_provider/path_provider.dart';
 
 // import '../../styles/extenciones.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference sedesCollection =
-    FirebaseFirestore.instance.collection('denzilescolar');
+    FirebaseFirestore.instance.collection('sedes');
 
 bool isDarkModeEnabled = false;
 bool _sideMenuOpen = false;
@@ -31,8 +31,8 @@ int articulos = 0;
 int buenos = 0;
 int malos = 0;
 int regulares = 0;
-var local = {};
-var storage;
+// var local = {};
+// var storage;
 
 class AndroidSedesPage extends StatefulWidget {
   AndroidSedesPage({Key key, this.location}) : super(key: key);
@@ -44,14 +44,6 @@ class AndroidSedesPage extends StatefulWidget {
 
 class AndroidSedesPageState extends State<AndroidSedesPage>
     with TickerProviderStateMixin {
-  // @override
-  // AnimationController _animationController;
-  // Animation _animation;
-  // bool _initialized = false;
-  // bool _resumenCards = false;
-  // bool _locationCards = false;
-  // bool _articulosCards = false;
-  // bool _error = false;
   List<dynamic> locations = [];
   // Define an async function to initialize FlutterFire
   void initializeFlutterFire() async {
@@ -66,9 +58,9 @@ class AndroidSedesPageState extends State<AndroidSedesPage>
       await getData(sedesCollection, widget.location, 'Web');
     } else if (Platform.isAndroid) {
       print(['Flutter Android', widget.location]);
-      final dir = await getApplicationDocumentsDirectory();
-      Hive.init(dir.path);
-      storage = await Hive.openBox('storage');
+      // final dir = await getApplicationDocumentsDirectory();
+      // Hive.init(dir.path);
+      // storage = await Hive.openBox('storage');
       var box = widget.location;
       box = box.toString().replaceAll('á', 'a');
       box = box.toString().replaceAll('é', 'e');
@@ -97,35 +89,38 @@ class AndroidSedesPageState extends State<AndroidSedesPage>
     try {
       List<Locations> array = [];
       articulos = 0;
-      var localt = storage.get('local');
-      // print(['local-0', localt]);
-      if (localt != null) {
-        local = localt;
-      } else {
-        local = {};
-        local['nombres'] = {};
-        local['keys'] = {};
-        local['nombres']['sedes'] = {};
-        local['keys']['sedes'] = {};
-      }
+      // var localt = storage.get('local');
+      // // print(['local-0', localt]);
+      // if (localt != null) {
+      //   local = localt;
+      // } else {
+      //   local = {};
+      //   local['nombres'] = {};
+      //   local['keys'] = {};
+      //   local['nombres']['sedes'] = {};
+      //   local['keys']['sedes'] = {};
+      // }
       var locationst = [];
       // print(['Internet locationst', locationst]);
-      await collection.get().then((QuerySnapshot querySnapshot) => {
-            querySnapshot.docs.forEach((doc) {
-              // print(doc.data());
-              var loc = Locations.fromFirebase(doc.data());
-              // print(['loc', loc.toJson()]);
-              array.add(loc);
-              locationst.add(loc.toJson());
-              local['nombres']['sedes'][doc.data()['nombre']] = {};
-              local['keys']['sedes'][doc.data()['key']] = {};
-              local['nombres']['sedes'][doc.data()['nombre']] = doc.data();
-              local['keys']['sedes'][doc.data()['key']] = doc.data();
-            })
-          });
+      await collection
+          .orderBy('nombre')
+          .get()
+          .then((QuerySnapshot querySnapshot) => {
+                querySnapshot.docs.forEach((doc) {
+                  // print(doc.data());
+                  var loc = Locations.fromFirebase(doc.data());
+                  // print(['loc', loc.toJson()]);
+                  array.add(loc);
+                  locationst.add(loc.toJson());
+                  // local['nombres']['sedes'][doc.data()['nombre']] = {};
+                  // local['keys']['sedes'][doc.data()['key']] = {};
+                  // local['nombres']['sedes'][doc.data()['nombre']] = doc.data();
+                  // local['keys']['sedes'][doc.data()['key']] = doc.data();
+                })
+              });
       // print(['Internet locationst', box, locationst]);
-      await storage.put(box, locationst);
-      await storage.put('local', local);
+      // await storage.put(box, locationst);
+      // await storage.put('local', local);
       // Aqui listo a las sedes por nombre
       // final data = local['nombres'] as Map;
       // final sedes = data['sedes'] as Map;
@@ -304,8 +299,8 @@ class AndroidSedesPageState extends State<AndroidSedesPage>
                           MaterialPageRoute(builder: (context) {
                         return AndroidUbicacionesPage(
                           locationCollection: FirebaseFirestore.instance
-                              .collection('denzilescolar')
-                              .doc(locations[index].sede.nombre)
+                              .collection('sedes')
+                              .doc(locations[index].sede.key)
                               .collection('ubicaciones'),
                           location: 'ubicaciones',
                           sede: locations[index].sede,
@@ -313,8 +308,8 @@ class AndroidSedesPageState extends State<AndroidSedesPage>
                       }));
                     },
                     locationCollection: FirebaseFirestore.instance
-                        .collection('denzilescolar')
-                        .doc(locations[index].sede.nombre)
+                        .collection('sedes')
+                        .doc(locations[index].sede.key)
                         .collection('ubicaciones'),
                     sede: locations[index].sede,
                     location: 'sede',

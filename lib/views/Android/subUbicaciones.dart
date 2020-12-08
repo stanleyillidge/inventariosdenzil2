@@ -16,14 +16,14 @@ import 'package:waterfall_flow/waterfall_flow.dart';
 // import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
+// import 'package:hive/hive.dart';
+// import 'package:path_provider/path_provider.dart';
 
 import '../../styles/extenciones.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference ubicacionsCollection =
-    FirebaseFirestore.instance.collection('denzilescolar');
+    FirebaseFirestore.instance.collection('sedes');
 
 bool isDarkModeEnabled = false;
 bool _sideMenuOpen = false;
@@ -68,9 +68,9 @@ class AndroidSubUbicacionesPageState extends State<AndroidSubUbicacionesPage>
         widget.sede.toJson(),
         widget.ubicacion.toJson()
       ]); */
-      final dir = await getApplicationDocumentsDirectory();
-      Hive.init(dir.path);
-      storage = await Hive.openBox('storage');
+      // final dir = await getApplicationDocumentsDirectory();
+      // Hive.init(dir.path);
+      // storage = await Hive.openBox('storage');
       var box = widget.ubicacion.key + ' - ' + widget.ubicacion.nombre;
       box = box.toString().replaceAll('á', 'a');
       box = box.toString().replaceAll('é', 'e');
@@ -92,41 +92,44 @@ class AndroidSubUbicacionesPageState extends State<AndroidSubUbicacionesPage>
       [int index]) async {
     try {
       List<Locations> array = [];
-      var local = await storage.get('local');
-      var locationst = [];
-      // print(['Internet locationst', locationst]);
-      local['nombres']['sedes'][widget.sede.nombre]['ubicaciones']
-          [widget.ubicacion.nombre]['subUbicaciones'] = {};
+      // var local = await storage.get('local');
+      // var locationst = [];
+      // // print(['Internet locationst', locationst]);
+      // local['nombres']['sedes'][widget.sede.nombre]['ubicaciones']
+      //     [widget.ubicacion.nombre]['subUbicaciones'] = {};
 
-      local['keys']['sedes'][widget.sede.key]['ubicaciones']
-          [widget.ubicacion.key]['subUbicaciones'] = {};
-      await collection.get().then((QuerySnapshot querySnapshot) => {
-            querySnapshot.docs.forEach((doc) {
-              // print(doc.data());
-              var loc = Locations.fromFirebase(doc.data());
-              loc.sede = widget.sede;
-              loc.ubicacion = widget.ubicacion;
-              // print(['loc', loc.toJson()]);
-              array.add(loc);
-              locationst.add(loc.toJson());
-              local['nombres']['sedes'][widget.sede.nombre]['ubicaciones']
-                      [widget.ubicacion.nombre]['subUbicaciones']
-                  [doc.data()['nombre']] = {};
-              local['keys']['sedes'][widget.sede.key]['ubicaciones']
-                      [widget.ubicacion.key]['subUbicaciones']
-                  [doc.data()['key']] = {};
+      // local['keys']['sedes'][widget.sede.key]['ubicaciones']
+      //     [widget.ubicacion.key]['subUbicaciones'] = {};
+      await collection
+          .orderBy('nombre')
+          .get()
+          .then((QuerySnapshot querySnapshot) => {
+                querySnapshot.docs.forEach((doc) {
+                  // print(doc.data());
+                  var loc = Locations.fromFirebase(doc.data());
+                  loc.sede = widget.sede;
+                  loc.ubicacion = widget.ubicacion;
+                  // print(['loc', loc.toJson()]);
+                  array.add(loc);
+                  // locationst.add(loc.toJson());
+                  // local['nombres']['sedes'][widget.sede.nombre]['ubicaciones']
+                  //         [widget.ubicacion.nombre]['subUbicaciones']
+                  //     [doc.data()['nombre']] = {};
+                  // local['keys']['sedes'][widget.sede.key]['ubicaciones']
+                  //         [widget.ubicacion.key]['subUbicaciones']
+                  //     [doc.data()['key']] = {};
 
-              local['nombres']['sedes'][widget.sede.nombre]['ubicaciones']
-                      [widget.ubicacion.nombre]['subUbicaciones']
-                  [doc.data()['nombre']] = doc.data();
-              local['keys']['sedes'][widget.sede.key]['ubicaciones']
-                      [widget.ubicacion.key]['subUbicaciones']
-                  [doc.data()['key']] = doc.data();
-            })
-          });
-      // print(['Internet locationst', box, locationst]);
-      await storage.put(box, locationst);
-      await storage.put('local', local);
+                  // local['nombres']['sedes'][widget.sede.nombre]['ubicaciones']
+                  //         [widget.ubicacion.nombre]['subUbicaciones']
+                  //     [doc.data()['nombre']] = doc.data();
+                  // local['keys']['sedes'][widget.sede.key]['ubicaciones']
+                  //         [widget.ubicacion.key]['subUbicaciones']
+                  //     [doc.data()['key']] = doc.data();
+                })
+              });
+      // print(['SubUbicaciones', array.toList()]);
+      // await storage.put(box, locationst);
+      // await storage.put('local', local);
       // Aqui listo a las ubicaciones de la sede por nombre
       /* final sedes = local['nombres']['sedes'] as Map;
       for (final sede in sedes.keys) {
@@ -322,12 +325,12 @@ class AndroidSubUbicacionesPageState extends State<AndroidSubUbicacionesPage>
                 itemBuilder: (BuildContext c, int index) {
                   CollectionReference locationCollection = FirebaseFirestore
                       .instance
-                      .collection('denzilescolar')
-                      .doc(locations[index].sede.nombre)
+                      .collection('sedes')
+                      .doc(locations[index].sede.key)
                       .collection('ubicaciones')
-                      .doc(locations[index].ubicacion.nombre)
+                      .doc(locations[index].ubicacion.key)
                       .collection('subUbicaciones')
-                      .doc(locations[index].nombre)
+                      .doc(locations[index].key)
                       .collection('inventario');
                   return LocationsCard(
                     fontSize: fontSize,

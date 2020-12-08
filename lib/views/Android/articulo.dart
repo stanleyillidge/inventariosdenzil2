@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
+// import 'package:hive/hive.dart';
+// import 'package:path_provider/path_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
@@ -15,6 +16,7 @@ import 'package:inventariosdenzil/styles/styles.dart';
 import 'package:inventariosdenzil/widgets/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../styles/extenciones.dart';
+import 'package:qrscan/qrscan.dart' as scanner;
 
 // Articulo articulo = Articulo();
 bool isDarkModeEnabled;
@@ -46,9 +48,9 @@ class _ArticuloPageState extends State<ArticuloPage> {
   var _valor = TextEditingController();
   var _descripcion = TextEditingController();
   List<String> _estadoList = ['Bueno', 'Malo', 'Regular'];
-  List<String> _sedeList = [];
-  List<String> _ubicacionList = [];
-  List<String> _subUbicacionList = [];
+  List<Referencia> _sedeList = [];
+  List<Referencia> _ubicacionList = [];
+  List<Referencia> _subUbicacionList = [];
   // Define an async function to initialize FlutterFire
   /* void initializeFlutterFire2() async {
     if (kIsWeb) {
@@ -105,11 +107,11 @@ class _ArticuloPageState extends State<ArticuloPage> {
     if (kIsWeb) {
       // print(['Flutter Web', widget.location]);
     } else if (Platform.isAndroid) {
-      final dir = await getApplicationDocumentsDirectory();
-      Hive.init(dir.path);
-      storage = await Hive.openBox('storage');
-      var localt = await storage.get('local');
-      if (localt != null) {
+      // final dir = await getApplicationDocumentsDirectory();
+      // Hive.init(dir.path);
+      // storage = await Hive.openBox('storage');
+      // var localt = await storage.get('local');
+      /* if (localt != null) {
         local = localt;
         final sedes = local['nombres']['sedes'] as Map;
         for (final sede in sedes.keys) {
@@ -138,58 +140,61 @@ class _ArticuloPageState extends State<ArticuloPage> {
             _subUbicacionList.add(subUbi);
           }
         }
-      }
-      /* await FirebaseFirestore.instance
-          .collection('denzilescolar')
+      } */
+      await FirebaseFirestore.instance
+          .collection('sedes')
           .get()
           .then((QuerySnapshot querySnapshot) => {
                 querySnapshot.docs.forEach((doc) {
                   // print(doc.data());
                   var loc = Locations.fromFirebase(doc.data());
-                  loc.sede = Referencia(nombre: loc.nombre, key: loc.sede.key);
-                  _sedeList.add(loc.nombre);
+                  // loc.sede = Referencia(nombre: loc.nombre, key: loc.sede.key);
+                  // print(loc.sede.nombre);
+                  _sedeList.add(loc.sede);
                 })
               });
       await FirebaseFirestore.instance
-          .collection('denzilescolar')
-          .doc(widget.articulo.sede.nombre)
+          .collection('sedes')
+          .doc(widget.articulo.sede.key)
           .collection('ubicaciones')
           .get()
           .then((QuerySnapshot querySnapshot) => {
                 querySnapshot.docs.forEach((doc) {
                   // print(doc.data());
                   var loc = Locations.fromFirebase(doc.data());
-                  loc.sede = Referencia(
-                      nombre: widget.articulo.sede.nombre, key: loc.sede.key);
-                  var ubicacion = loc.ubicacion.nombre;
-                  _ubicacionList.add(ubicacion);
+                  // loc.sede = Referencia(
+                  //     nombre: widget.articulo.sede.nombre, key: loc.sede.key);
+                  // var ubicacion = loc.ubicacion.nombre;
+                  // print(loc.ubicacion.nombre);
+                  _ubicacionList.add(loc.ubicacion);
                 })
               });
       await FirebaseFirestore.instance
-          .collection('denzilescolar')
-          .doc(widget.articulo.sede.nombre)
+          .collection('sedes')
+          .doc(widget.articulo.sede.key)
           .collection('ubicaciones')
-          .doc(widget.articulo.ubicacion.nombre)
+          .doc(widget.articulo.ubicacion.key)
           .collection('subUbicaciones')
           .get()
           .then((QuerySnapshot querySnapshot) => {
                 querySnapshot.docs.forEach((doc) {
                   // print(doc.data());
                   var loc = Locations.fromFirebase(doc.data());
-                  loc.sede = Referencia(
-                      nombre: widget.articulo.sede.nombre, key: loc.sede.key);
-                  loc.ubicacion = Referencia(
-                      nombre: widget.articulo.ubicacion.nombre,
-                      key: loc.ubicacion.key);
-                  var subUbicacion = loc.subUbicacion.nombre;
-                  _subUbicacionList.add(subUbicacion);
+                  // loc.sede = Referencia(
+                  //     nombre: widget.articulo.sede.nombre, key: loc.sede.key);
+                  // loc.ubicacion = Referencia(
+                  //     nombre: widget.articulo.ubicacion.nombre,
+                  //     key: loc.ubicacion.key);
+                  // var subUbicacion = loc.subUbicacion.nombre;
+                  // print(loc.subUbicacion.nombre);
+                  _subUbicacionList.add(loc.subUbicacion);
                 })
-              }); */
+              });
       setState(() {
         // articulo = widget.articulo.fromLocal(articulot);
-        _sede = widget.articulo.sede.nombre;
-        _ubicacion = widget.articulo.ubicacion.nombre;
-        _subUbicacion = widget.articulo.subUbicacion.nombre;
+        _sede = widget.articulo.sede.key;
+        _ubicacion = widget.articulo.ubicacion.key;
+        _subUbicacion = widget.articulo.subUbicacion.key;
         _estado = widget.articulo.estado;
         _nombre.text = widget.articulo.nombre;
         _serie.text = widget.articulo.serie;
@@ -204,10 +209,11 @@ class _ArticuloPageState extends State<ArticuloPage> {
   }
 
   change(String sede, [String ubicacion]) async {
+    print(['sede', sede, 'ubicacion', ubicacion]);
     if (_sede != sede) {
       _ubicacionList = [];
       await FirebaseFirestore.instance
-          .collection('denzilescolar')
+          .collection('sedes')
           .doc(sede)
           .collection('ubicaciones')
           .get()
@@ -215,9 +221,9 @@ class _ArticuloPageState extends State<ArticuloPage> {
                 querySnapshot.docs.forEach((doc) {
                   // print(doc.data());
                   var loc = Locations.fromFirebase(doc.data());
-                  loc.sede = Referencia(nombre: sede, key: loc.sede.key);
-                  var ubicacion = loc.ubicacion.nombre;
-                  _ubicacionList.add(ubicacion);
+                  // loc.sede = Referencia(nombre: sede, key: loc.sede.key);
+                  // var ubicacion = loc.ubicacion.nombre;
+                  _ubicacionList.add(loc.ubicacion);
 
                   // if (local['nombres']['sedes'][loc.sede.nombre]['ubicaciones'] ==
                   //     null) {
@@ -241,7 +247,7 @@ class _ArticuloPageState extends State<ArticuloPage> {
     if (ubicacion != null) {
       _subUbicacionList = [];
       await FirebaseFirestore.instance
-          .collection('denzilescolar')
+          .collection('sedes')
           .doc(sede)
           .collection('ubicaciones')
           .doc(ubicacion)
@@ -251,11 +257,12 @@ class _ArticuloPageState extends State<ArticuloPage> {
                 querySnapshot.docs.forEach((doc) {
                   // print(doc.data());
                   var loc = Locations.fromFirebase(doc.data());
-                  loc.sede = Referencia(nombre: sede, key: loc.sede.key);
-                  loc.ubicacion =
-                      Referencia(nombre: ubicacion, key: loc.ubicacion.key);
-                  var subUbicacion = loc.subUbicacion.nombre;
-                  _subUbicacionList.add(subUbicacion);
+                  // loc.sede = Referencia(nombre: sede, key: loc.sede.key);
+                  // loc.ubicacion =
+                  //     Referencia(nombre: ubicacion, key: loc.ubicacion.key);
+                  // var subUbicacion = loc.subUbicacion.nombre;
+                  // print(subUbicacion);
+                  _subUbicacionList.add(loc.subUbicacion);
 
                   // if (local['nombres']['sedes'][loc.sede.nombre]['ubicaciones']
                   //         [loc.ubicacion.nombre]['subUbicaciones'] ==
@@ -501,10 +508,11 @@ class _ArticuloPageState extends State<ArticuloPage> {
                                   hint: FittedBox(
                                       child: Text('Seleciona una sede',
                                           style: TextStyle(color: Colors.red))),
-                                  items: _sedeList.map((String value) {
+                                  items: _sedeList.map((Referencia value) {
                                     return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: FittedBox(child: Text(value)),
+                                      value: value.key,
+                                      child:
+                                          FittedBox(child: Text(value.nombre)),
                                     );
                                   }).toList(),
                                 ),
@@ -547,15 +555,20 @@ class _ArticuloPageState extends State<ArticuloPage> {
                                       state.didChange(newValue);
                                     });
                                     await change(_sede, newValue);
-                                    print('Listo sub');
+                                    print([
+                                      'Listo sub',
+                                      _subUbicacionList.toList()
+                                    ]);
                                   },
                                   hint: FittedBox(
                                       child: Text('Seleciona una ubicacion',
                                           style: TextStyle(color: Colors.red))),
-                                  items: _ubicacionList.map((String ubicacion) {
+                                  items: _ubicacionList
+                                      .map((Referencia ubicacion) {
                                     return DropdownMenuItem<String>(
-                                      value: ubicacion,
-                                      child: FittedBox(child: Text(ubicacion)),
+                                      value: ubicacion.key,
+                                      child: FittedBox(
+                                          child: Text(ubicacion.nombre)),
                                     );
                                   }).toList(),
                                 ),
@@ -604,10 +617,12 @@ class _ArticuloPageState extends State<ArticuloPage> {
                                   hint: FittedBox(
                                       child: Text('Seleciona una subUbicacion',
                                           style: TextStyle(color: Colors.red))),
-                                  items: _subUbicacionList.map((String value) {
+                                  items:
+                                      _subUbicacionList.map((Referencia value) {
                                     return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: FittedBox(child: Text(value)),
+                                      value: value.key,
+                                      child:
+                                          FittedBox(child: Text(value.nombre)),
                                     );
                                   }).toList(),
                                 ),
@@ -672,6 +687,16 @@ class _ArticuloPageState extends State<ArticuloPage> {
                       controller: _serie,
                       decoration: InputDecoration(
                         icon: Icon(Inventarios.barcode),
+                        suffixIcon: IconButton(
+                          onPressed: () async {
+                            String barcode = await scanner.scan();
+                            print(['barcode', barcode]);
+                            setState(() {
+                              _serie.text = barcode;
+                            });
+                          },
+                          icon: Icon(Icons.add_box),
+                        ),
                         hintText: 'Serial',
                         contentPadding: EdgeInsets.all(15.0),
                         // border: InputBorder.none,

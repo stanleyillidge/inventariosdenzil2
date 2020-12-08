@@ -227,7 +227,9 @@ exports.inventario = functions.https.onRequest(async (req, res) => {
     const step = 495;
     let contadores = {};
     let inventario = {};
+    let inventariot = {};
     let articulost = {};
+    let articulosUnicosBatch = firestore.batch();
     let articulosUnicos = {};
     let articulosArray = [];
     let aArray = [];
@@ -271,11 +273,11 @@ exports.inventario = functions.https.onRequest(async (req, res) => {
           subUbicacion: subUbicacionkey,
           subUbicacionNombre: subUbicacionNombre,
         };
-        const rutaSede = 'sedes/'+sedeNombre;
-        const rutaUbicacion = rutaSede+'/ubicaciones/'+ubicacionNombre;
-        const rutaSubUbicacion = rutaUbicacion+'/subUbicaciones/'+subUbicacionNombre;
-        const rutaInventario = rutaSubUbicacion+'/inventario/'+datos.nombre;
-        const rutaArticulos = rutaInventario+'/articulos/'+datos.nombre;
+        const rutaSede = 'sedes/'+sedekey;
+        const rutaUbicacion = rutaSede+'/ubicaciones/'+ubicacionkey;
+        const rutaSubUbicacion = rutaUbicacion+'/subUbicaciones/'+subUbicacionkey;
+        const rutaInventario = rutaSubUbicacion+'/inventario/'+datos.articulo;
+        const rutaArticulos = rutaInventario+'/articulos/'+datos.key;
 
         if(contadores[rutaSede] === undefined){
           contadores[rutaSede] = {
@@ -301,14 +303,30 @@ exports.inventario = functions.https.onRequest(async (req, res) => {
             cantidad: 0,
           };
         }
-        if(inventario[rutaInventario] === undefined){
-          inventario[rutaInventario] = {
+        if(inventariot[rutaInventario] === undefined){
+          inventariot[rutaInventario] = {
             Buenos: 0,
             Malos: 0,
             Regulares: 0,
             cantidad: 0,
             nombre: datos.nombre,
-            key: key,
+            key: datos.articulo,
+            sede: datos.sede,
+            sedeNombre: datos.sedeNombre,
+            ubicacion: datos.ubicacion,
+            ubicacionNombre: datos.ubicacionNombre,
+            subUbicacion: datos.subUbicacion,
+            subUbicacionNombre: datos.subUbicacionNombre,
+          };
+        }
+        if(inventario[rutaInventario] === undefined){
+          inventario[rutaInventario] = {
+            Buenos: (inventariot[rutaInventario].Buenos!==undefined)?inventariot[rutaInventario].Buenos:0,
+            Malos: (inventariot[rutaInventario].Malos!==undefined)?inventariot[rutaInventario].Malos:0,
+            Regulares: (inventariot[rutaInventario].Regulares!==undefined)?inventariot[rutaInventario].Regulares:0,
+            cantidad: (inventariot[rutaInventario].cantidad!==undefined)?inventariot[rutaInventario].cantidad:0,
+            nombre: datos.nombre,
+            key: datos.articulo,
             sede: datos.sede,
             sedeNombre: datos.sedeNombre,
             ubicacion: datos.ubicacion,
@@ -340,6 +358,8 @@ exports.inventario = functions.https.onRequest(async (req, res) => {
             contadores[rutaSubUbicacion].cantidad += 1;
             inventario[rutaInventario].Buenos += 1;
             inventario[rutaInventario].cantidad += 1;
+            inventariot[rutaInventario].Buenos += 1;
+            inventariot[rutaInventario].cantidad += 1;
             break;
           case "Malo":
             contadores[rutaSede].Malos += 1;
@@ -349,7 +369,9 @@ exports.inventario = functions.https.onRequest(async (req, res) => {
             contadores[rutaSubUbicacion].Malos += 1;
             contadores[rutaSubUbicacion].cantidad += 1;
             inventario[rutaInventario].Malos += 1;
+            inventariot[rutaInventario].Malos += 1;
             inventario[rutaInventario].cantidad += 1;
+            inventariot[rutaInventario].cantidad += 1;
             break;
           case "Regular":
             contadores[rutaSede].Regulares += 1;
@@ -359,7 +381,9 @@ exports.inventario = functions.https.onRequest(async (req, res) => {
             contadores[rutaSubUbicacion].Regulares += 1;
             contadores[rutaSubUbicacion].cantidad += 1;
             inventario[rutaInventario].Regulares += 1;
+            inventariot[rutaInventario].Regulares += 1;
             inventario[rutaInventario].cantidad += 1;
+            inventariot[rutaInventario].cantidad += 1;
             break;
           default:
             break;
@@ -368,29 +392,41 @@ exports.inventario = functions.https.onRequest(async (req, res) => {
       conta += 1;
       steper += 1;
       if(Number.isInteger(steper/step)){
-        functions.logger.info('Articulo',conta,'de',fin);
+        // functions.logger.info('Carga grupo',conta,'de',fin);
 
         iArray.push(inventario);
         inventarioArray.push(batchs(inventario,'inventario'));
-        functions.logger.info('Objeto de inventario parcial a ser enviado', inventario);
+        // functions.logger.log('Objeto de inventario parcial a ser enviado', iArray);
 
         aArray.push(articulost);
         articulosArray.push(batchs(articulost,'articulos'));
-        functions.logger.info('Objeto de articulos parcial a ser enviado', articulost);
+        // functions.logger.log('Objeto de articulos parcial a ser enviado', aArray);
 
-        cArray.push(contadores);
-        contadoresArray.push(batchs(contadores,'contadores'));
-        functions.logger.info('Objeto de contadores parcial a ser enviado', contadores);
-
-        // contadores = {};
-        // inventario = {};
+        inventario = {};
         articulost = {};
       }
       // functions.logger.log('Articulo',conta,'de',fin);
       if(conta === fin){
+        inventarioArray.push(batchs(inventario,'inventario'));
+        articulosArray.push(batchs(articulost,'articulos'));
+        contadoresArray.push(batchs(contadores,'contadores'));
+        iArray.push(inventario);
+        aArray.push(articulost);
         functions.logger.log('Articulo',conta,'de',fin);
-        firestore.collection('articulosUnicos2').add(articulosUnicos);
-
+        const au = Object.keys(articulosUnicos);
+        const c = Object.keys(contadores);
+        functions.logger.log('Inventario',iArray.length);
+        functions.logger.log('Articulos',aArray.length);
+        functions.logger.log('Articulos unicos',au.length);
+        functions.logger.log('Contadores',c.length);
+        // --- articulos unicos comit -----
+          const keys = Object.keys(articulosUnicos);
+          keys.forEach(key => {
+            const ruta = 'articulosUnicos2/'+key;
+            articulosUnicosBatch.set(firestore.doc(ruta), articulosUnicos[key]);
+          });
+          articulosUnicosBatch.commit();
+        // --------------------------------
         Promise.all(inventarioArray).then(() => {
           functions.logger.info('Fin de escritura de todo el Inventario');
           return
@@ -564,23 +600,31 @@ exports.inventario = functions.https.onRequest(async (req, res) => {
   });
 });
 //6835
+let cc,ic,ac = 0;
 function batchs(array,tipo){
   let batch = firestore.batch();
+  let ccc= 0;
   return new Promise((resolve, reject) => {
-    functions.logger.info('Batch',tipo,array);
+    // functions.logger.info('Batch',tipo,array);
     const keys = Object.keys(array);
     switch (tipo) {
       case 'contadores':
+        cc += 1;
+        ccc = cc;
         keys.forEach(key => {
           batch.update(firestore.doc(key), array[key]);
         });
         break;
       case 'inventario':
+        ic += 1;
+        ccc = ic;
         keys.forEach(key => {
-          batch.update(firestore.doc(key), array[key]);
+          batch.set(firestore.doc(key), array[key]);
         });
         break;
       case 'articulos':
+        ac += 1;
+        ccc = ac;
         keys.forEach(key => {
           batch.set(firestore.doc(key), array[key]);
         });
@@ -589,8 +633,8 @@ function batchs(array,tipo){
         break;
     }
     batch.commit().then(()=> {
-      functions.logger.log(tipo,'Termino');
-      resolve(tipo,"Finalizó con Exito!");
+      functions.logger.log(ccc,tipo,'Termino');
+      resolve(ccc,tipo,"Finalizó con Exito!");
       return;
     }).catch((e)=>{
       functions.logger.error("Error en batch " + tipo,e);

@@ -65,14 +65,15 @@ class Locations {
         (json['ubicacion'] == null) &&
         (json['subUbicacion'] == null)) {
       location = 'ubicacion';
-      sede = Referencia(key: json['sede']);
+      sede = Referencia(key: json['sede'], nombre: json['sedeNombre']);
       ubicacion = Referencia.fromFirebase(json);
     } else if ((json['sede'] != null) &&
         (json['ubicacion'] != null) &&
         (json['subUbicacion'] == null)) {
       location = 'subUbicacion';
-      sede = Referencia(key: json['sede']);
-      ubicacion = Referencia(key: json['ubicacion']);
+      sede = Referencia(key: json['sede'], nombre: json['sedeNombre']);
+      ubicacion =
+          Referencia(key: json['ubicacion'], nombre: json['ubicacionNombre']);
       subUbicacion = Referencia.fromFirebase(json);
     }
 
@@ -155,7 +156,7 @@ class Locations {
 
 class Articulo {
   int cantidad;
-  int fechaModif;
+  String fechaModif;
   String articulo;
   String creacion;
   String descripcion;
@@ -169,7 +170,6 @@ class Articulo {
   String key;
   String modificaciones;
   String nombre;
-  String nombreImagen;
   String observaciones;
   String serie;
   Referencia sede;
@@ -192,7 +192,6 @@ class Articulo {
     this.key,
     this.modificaciones,
     this.nombre,
-    this.nombreImagen,
     this.observaciones,
     this.serie,
     this.sede,
@@ -240,9 +239,8 @@ class Articulo {
       key: json['key'],
       modificaciones: json['modificaciones'],
       nombre: json['nombre'],
-      nombreImagen: json['nombreImagen'],
       observaciones: json['observaciones'],
-      valor: json['valor'],
+      valor: (json['valor'] is int) ? json['valor'] : 0,
       serie: json['serie'],
     );
   }
@@ -276,9 +274,8 @@ class Articulo {
       key: json['key'],
       modificaciones: json['modificaciones'],
       nombre: json['nombre'],
-      nombreImagen: json['nombreImagen'],
       observaciones: json['observaciones'],
-      valor: json['valor'],
+      valor: (json['valor'] is int) ? json['valor'] : 0,
       serie: json['serie'],
     );
   }
@@ -302,7 +299,6 @@ class Articulo {
       'key': key,
       'modificaciones': modificaciones,
       'nombre': nombre,
-      'nombreImagen': nombreImagen,
       'observaciones': observaciones,
       'valor': valor,
       'serie': serie,

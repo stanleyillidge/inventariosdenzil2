@@ -15,14 +15,14 @@ import 'package:waterfall_flow/waterfall_flow.dart';
 // import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
+// import 'package:hive/hive.dart';
+// import 'package:path_provider/path_provider.dart';
 
 import '../../styles/extenciones.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference ubicacionsCollection =
-    FirebaseFirestore.instance.collection('denzilescolar');
+    FirebaseFirestore.instance.collection('sedes');
 
 bool isDarkModeEnabled = false;
 bool _sideMenuOpen = false;
@@ -55,9 +55,9 @@ class AndroidUbicacionesPageState extends State<AndroidUbicacionesPage>
       await getData(widget.locationCollection, widget.sede.nombre, 'Web');
     } else if (Platform.isAndroid) {
       // print(['Flutter Android', widget.location]);
-      final dir = await getApplicationDocumentsDirectory();
-      Hive.init(dir.path);
-      storage = await Hive.openBox('storage');
+      // final dir = await getApplicationDocumentsDirectory();
+      // Hive.init(dir.path);
+      // storage = await Hive.openBox('storage');
       var box = widget.sede.nombre;
       box = box.toString().replaceAll('á', 'a');
       box = box.toString().replaceAll('é', 'e');
@@ -79,33 +79,36 @@ class AndroidUbicacionesPageState extends State<AndroidUbicacionesPage>
       [int index]) async {
     try {
       List<Locations> array = [];
-      var local = await storage.get('local');
+      // var local = await storage.get('local');
       var locationst = [];
       // print(['Internet locationst', locationst]);
-      local['nombres']['sedes'][widget.sede.nombre]['ubicaciones'] = {};
-      local['keys']['sedes'][widget.sede.key]['ubicaciones'] = {};
-      await collection.get().then((QuerySnapshot querySnapshot) => {
-            querySnapshot.docs.forEach((doc) {
-              // print(doc.data());
-              var loc = Locations.fromFirebase(doc.data());
-              loc.sede = widget.sede;
-              // print(['loc', loc.toJson()]);
-              array.add(loc);
-              locationst.add(loc.toJson());
-              local['nombres']['sedes'][loc.sede.nombre]['ubicaciones']
-                  [doc.data()['nombre']] = {};
-              local['keys']['sedes'][loc.sede.key]['ubicaciones']
-                  [doc.data()['key']] = {};
+      // local['nombres']['sedes'][widget.sede.nombre]['ubicaciones'] = {};
+      // local['keys']['sedes'][widget.sede.key]['ubicaciones'] = {};
+      await collection
+          .orderBy('nombre')
+          .get()
+          .then((QuerySnapshot querySnapshot) => {
+                querySnapshot.docs.forEach((doc) {
+                  // print(doc.data());
+                  var loc = Locations.fromFirebase(doc.data());
+                  loc.sede = widget.sede;
+                  // print(['loc', loc.toJson()]);
+                  array.add(loc);
+                  locationst.add(loc.toJson());
+                  // local['nombres']['sedes'][loc.sede.nombre]['ubicaciones']
+                  //     [doc.data()['nombre']] = {};
+                  // local['keys']['sedes'][loc.sede.key]['ubicaciones']
+                  //     [doc.data()['key']] = {};
 
-              local['nombres']['sedes'][loc.sede.nombre]['ubicaciones']
-                  [doc.data()['nombre']] = doc.data();
-              local['keys']['sedes'][loc.sede.key]['ubicaciones']
-                  [doc.data()['key']] = doc.data();
-            })
-          });
+                  // local['nombres']['sedes'][loc.sede.nombre]['ubicaciones']
+                  //     [doc.data()['nombre']] = doc.data();
+                  // local['keys']['sedes'][loc.sede.key]['ubicaciones']
+                  //     [doc.data()['key']] = doc.data();
+                })
+              });
       // print(['Internet locationst', box, locationst]);
-      await storage.put(box, locationst);
-      await storage.put('local', local);
+      // await storage.put(box, locationst);
+      // await storage.put('local', local);
       // Aqui listo a las ubicaciones de la sede por nombre
       /* final sedes = local['nombres']['sedes'] as Map;
       for (final sede in sedes.keys) {
@@ -326,10 +329,10 @@ class AndroidUbicacionesPageState extends State<AndroidUbicacionesPage>
                 itemBuilder: (BuildContext c, int index) {
                   CollectionReference locationCollection = FirebaseFirestore
                       .instance
-                      .collection('denzilescolar')
-                      .doc(locations[index].sede.nombre)
+                      .collection('sedes')
+                      .doc(locations[index].sede.key)
                       .collection('ubicaciones')
-                      .doc(locations[index].ubicacion.nombre)
+                      .doc(locations[index].ubicacion.key)
                       .collection('subUbicaciones');
                   return LocationsCard(
                     fontSize: fontSize,
